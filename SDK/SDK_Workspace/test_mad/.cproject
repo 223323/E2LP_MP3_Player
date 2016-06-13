@@ -275,4 +275,5 @@
 			<resource resourceType="PROJECT" workspacePath="/test_mad"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

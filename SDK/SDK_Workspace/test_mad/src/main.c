@@ -50,15 +50,17 @@
 
 #include "dds.h"
 
+
+#define xil_printf(...)
 // Params.
 
 #define ENABLE_LOGS 0
 
-#define ENABLE_LOG_NUM_STARVING_SAMPLES 1
+#define ENABLE_LOG_NUM_STARVING_SAMPLES 0
 
 #define NUM_OUT_BUFFS 2
 
-#define IN_BUFF_LEN 8192
+#define IN_BUFF_LEN 2048
 
 
 // Audio stuff.
@@ -385,10 +387,12 @@ int main(void) {
 
 	XStatus status;
 
+	/*
 	status = XIntc_Initialize(&intc, XPAR_INTC_0_DEVICE_ID);
 	if (status != XST_SUCCESS) {
 		xil_printf("Intc failed with status = %d\n", status);
 	}
+	*/
 
 	/*
 	status = XIntc_Connect(&intc,
@@ -408,7 +412,7 @@ int main(void) {
 
 	// XIntc_Enable(&intc, XPAR_AXI_INTC_0_AUDIO_OUT_O_SAMPLE_INTERRUPT_INTR);
 
-	microblaze_enable_interrupts();
+	//microblaze_enable_interrupts();
 
 
 	// SD card stuff.

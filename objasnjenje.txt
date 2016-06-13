@@ -1,0 +1,5 @@
+- U c:\materija\ra248-2013\E2LP_MP3_Player\E2LP_MP3_Player_XPS_Project\SDK\SDK_Workspace\test_mad\src\mp3_parsing.*
+	služi za parsiranje headera. U istom test_mad projektu se nalazi kako čitati fajl sa SD kartice i kako pročitati
+	podatke is mp3 header-a 
+- Pored toga koristiti nadograditi mp3_parsing.* sa parsiranjem "MPEG Audio Tag ID3v1" po uzoru na
+	C:/materija/ra248-2013/E2LP_MP3_Player/Docs/MPEG AUDIO FRAME HEADER.html 
