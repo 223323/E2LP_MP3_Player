@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>mp3_player</name>
-	<comment>helloworld_bsp - microblaze_0</comment>
+	<name>test_sdcard</name>
+	<comment></comment>
 	<projects>
 		<project>helloworld_bsp</project>
+		<project>E2LP_MP3_Player_bsp</project>
+		<project>sdcard_fat_bsp</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

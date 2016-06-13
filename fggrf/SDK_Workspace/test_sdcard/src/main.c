@@ -29,7 +29,7 @@ static XIntc intc;
 
 #define die(rc) \
 	do{ \
-		xil_printf("Failed with rc=%d.\r\n", (int)rc); \
+		xil_printf("Failed with rc=%d.\n", (int)rc); \
 		return 1; \
 	}while(0)
 
@@ -114,7 +114,7 @@ int main(void) {
 	init_platform();
 
 	// Timer stuff.
-	xil_printf("start\r\n\r");
+	xil_printf("start\n\r");
 
 	char string_s[] = "MP3 PLAYER SONG LIST";
 	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x00, 0x0);// direct mode   0
@@ -133,7 +133,7 @@ int main(void) {
 	//print_string(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR, string_s, 6);
 
 	//return;
-   //xil_printf("OpeningAAA F a test file \"MESSAGE.TXT\"...\r\n");
+   //xil_printf("OpeningAAA F a test file \"MESSAGE.TXT\"...\n");
    xil_printf(string_s);
 
 
@@ -143,35 +143,32 @@ int main(void) {
 
 	status = XIntc_Initialize(&intc, XPAR_INTC_0_DEVICE_ID);
 	if (status != XST_SUCCESS) {
-		xil_printf("Intc failed with status = %d\r\n", status);
+		xil_printf("Intc failed with status = %d\n", status);
 	}
 
-	xil_printf("0\r\n");
+	xil_printf("0\n");
 
-	/*
-	// izbacen audio
 	status = XIntc_Connect(&intc,
 			XPAR_AXI_INTC_0_AUDIO_OUT_O_SAMPLE_INTERRUPT_INTR,
 			sample_interrupt_handler, 0);
-			*/
 	if (status != XST_SUCCESS) {
-		xil_printf("Failed to connect sample_interrupt with status = %d\r\n",
+		xil_printf("Failed to connect sample_interrupt with status = %d\n",
 				status);
 	}
 
-	xil_printf("1\r\n");
+	xil_printf("1\n");
 
 	status = XIntc_Start(&intc, XIN_REAL_MODE);
 	if (status != XST_SUCCESS) {
-		xil_printf("Failed to start intc with status = %d\r\n", status);
+		xil_printf("Failed to start intc with status = %d\n", status);
 	}
 
-	xil_printf("2\r\n");
+	xil_printf("2\n");
 
-	// izbacen audio
-	//XIntc_Enable(&intc, XPAR_AXI_INTC_0_AUDIO_OUT_O_SAMPLE_INTERRUPT_INTR);
 
-	xil_printf("3\r\n");
+	XIntc_Enable(&intc, XPAR_AXI_INTC_0_AUDIO_OUT_O_SAMPLE_INTERRUPT_INTR);
+
+	xil_printf("3\n");
 	microblaze_enable_interrupts();
 
 	// PFF stuff.
@@ -183,18 +180,18 @@ int main(void) {
 	BYTE buff[64];
 	FRESULT rc;
 
-	xil_printf("Mounting a volume...\r\n");
+	xil_printf("Mounting a volume...\n");
 
 	rc = pf_mount(&fatfs);
 	if (rc)
 		die(rc);
 
-	xil_printf("Opening a test file \"MESSAGE.TXT\"...\r\n");
+	xil_printf("Opening a test file \"MESSAGE.TXT\"...\n");
 	rc = pf_open("MESSAGE.TXT");
 	if (rc)
 		die(rc);
 
-	xil_printf("File content:\r\n");
+	xil_printf("File content:\n");
 	for (;;) {
 		rc = pf_read(buff, sizeof(buff), &br);	// Read a chunk of file
 		if (rc || !br)
@@ -203,7 +200,7 @@ int main(void) {
 			xil_printf("%c", buff[i]);
 		}
 	}
-	xil_printf("\r\n");
+	xil_printf("\n");
 
 	if (rc)
 		die(rc);
@@ -213,39 +210,39 @@ int main(void) {
 
 #if 0
 #if _USE_WRITE
-	xil_printf("Open a file \"WRITE.TXT\" for writing...\r\n");
+	xil_printf("Open a file \"WRITE.TXT\" for writing...\n");
 	rc = pf_open("WRITE.TXT");
 	if (rc) die(rc);
 
-	xil_printf("Writing \"Hello world!\" a text data...\r\n");
+	xil_printf("Writing \"Hello world!\" a text data...\n");
 	for (;;) {
-		rc = pf_write("Hello world!\r\r\n", 14, &bw);
+		rc = pf_write("Hello world!\r\n", 14, &bw);
 		if (rc || !bw) break;
 	}
 	if (rc) die(rc);
 
-	xil_printf("Terminating the file write process...\r\n");
+	xil_printf("Terminating the file write process...\n");
 	rc = pf_write(0, 0, &bw);
 	if (rc) die(rc);
 #endif
 #endif
 
 #if _USE_DIR
-	xil_printf("Open root directory...\r\n");
+	xil_printf("Open root directory...\n");
 	rc = pf_opendir(&dir, "");
 	if (rc)
 		die(rc);
 
-	xil_printf("Directory listing:\r\n");
+	xil_printf("Directory listing:\n");
 	for (;;) {
 		rc = pf_readdir(&dir, &fno);	// Read a directory item
 		if (rc || !fno.fname[0])
 			break;	// Error or end of dir
 		if (fno.fattrib & AM_DIR) {
-			xil_printf("   <dir>  %s\r\n", fno.fname);
+			xil_printf("   <dir>  %s\n", fno.fname);
 		}
 		else {
-			xil_printf("%8d  %s\r\n", fno.fsize, fno.fname);
+			xil_printf("%8d  %s\n", fno.fsize, fno.fname);
 		}
 	}
 	if (rc)
@@ -255,11 +252,11 @@ int main(void) {
 	// Test reading speed.
 
 #if 1
-	xil_printf("Testing reading speed...\r\n");
-	xil_printf("Opening a mp3 file...\r\n");
+	xil_printf("Testing reading speed...\n");
+	xil_printf("Opening a mp3 file...\n");
 	rc = pf_open("LINDSE~1.MP3");
 	if (rc) {
-		xil_printf("Failed opening mp3 file with rc = %d!\r\n", (int) rc);
+		xil_printf("Failed opening mp3 file with rc = %d!\n", (int) rc);
 		return 1;
 	}
 
@@ -270,12 +267,12 @@ int main(void) {
 	u8 checksum = 0;
 #endif
 
-	xil_printf("Reading mp3 file...\r\n");
+	xil_printf("Reading mp3 file...\n");
 	clock_t start = clock();
 	for (i = 0; i < 10; i++) {
 		rc = pf_read(read_buff, sizeof(read_buff), &br); /* Read a chunk of file */
 		if (rc) {
-			xil_printf("Error while reading mp3 file with rc = %d!\r\n", (int) rc);
+			xil_printf("Error while reading mp3 file with rc = %d!\n", (int) rc);
 			return 1;
 		}
 		if (!br) {
@@ -291,18 +288,18 @@ int main(void) {
 	}
 	clock_t end = clock();
 	clock_t read_clks = end - start;
-	xil_printf("start = %d\r\n", start);
-	xil_printf("end = %d\r\n", end);
-	xil_printf("read_clks = %d\r\n", read_clks);
-	xil_printf("read time = %dus\r\n", clock_t2us(read_clks));
-	xil_printf("read bytes = %dB\r\n", read_bytes);
-	xil_printf("read bandwidth = %dBps\r\n", (u32)((u64)read_bytes * CLOCKS_PER_SEC/read_clks));
+	xil_printf("start = %d\n", start);
+	xil_printf("end = %d\n", end);
+	xil_printf("read_clks = %d\n", read_clks);
+	xil_printf("read time = %dus\n", clock_t2us(read_clks));
+	xil_printf("read bytes = %dB\n", read_bytes);
+	xil_printf("read bandwidth = %dBps\n", (u32)((u64)read_bytes * CLOCKS_PER_SEC/read_clks));
 #ifdef CHECKSUM
-	xil_printf("checksum = 0x%02x\r\n", checksum);
+	xil_printf("checksum = 0x%02x\n", checksum);
 #endif
 
 #endif
-	xil_printf("Test completed.\r\n");
+	xil_printf("Test completed.\n");
 
 	return 0;
 }

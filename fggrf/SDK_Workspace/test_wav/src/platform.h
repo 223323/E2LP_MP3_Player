@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012 Xilinx, Inc.  All rights reserved.
+ * Copyright (c) 2008 Xilinx, Inc.  All rights reserved.
  *
  * Xilinx, Inc.
  * XILINX IS PROVIDING THIS DESIGN, CODE, OR INFORMATION "AS IS" AS A
@@ -16,31 +16,12 @@
  *
  */
 
-/*
- * helloworld.c: simple test application
- *
- * This application configures UART 16550 to baud rate 9600.
- * PS7 UART (Zynq) is not initialized by this application, since
- * bootrom/bsp configures it to baud rate 115200
- *
- * ------------------------------------------------
- * | UART TYPE   BAUD RATE                        |
- * ------------------------------------------------
- *   uartns550   9600
- *   uartlite    Configurable only in HW design
- *   ps7_uart    115200 (configured by bootrom/bsp)
- */
+#ifndef __PLATFORM_H_
+#define __PLATFORM_H_
 
-#include <stdio.h>
-#include "platform.h"
+#include "platform_config.h"
 
-void print(char *str);
+void init_platform();
+void cleanup_platform();
 
-int main()
-{
-    init_platform();
-
-    print("Hello World\n\r");
-
-    return 0;
-}
+#endif

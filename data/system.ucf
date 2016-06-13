@@ -85,13 +85,13 @@ NET sdcard_spi_MOSI_pin LOC = "R24"  |  IOSTANDARD = "LVCMOS33"; # MMC_CMD, MOSI
 NET sdcard_spi_SS_pin   LOC = "R19"  |  IOSTANDARD = "LVCMOS33"; # MMC_DATA3, SS
 
 
-NET audio_out_o_audio_codec_lrclk_pin LOC = "AB7" | IOSTANDARD = "LVCMOS18" | DRIVE = 24;
-NET audio_out_o_audio_codec_bclk_pin LOC = "AB5" | IOSTANDARD = "LVCMOS18" | DRIVE = 24;
-NET audio_out_o_audio_codec_bclk_pin CLOCK_DEDICATED_ROUTE = FALSE;
-NET audio_out_o_audio_codec_dac_sdata_pin LOC = "AA7" | IOSTANDARD = "LVCMOS18" | DRIVE = 24;
-NET audio_out_i_audio_codec_adc_sdata0_pin LOC = "AA5" | IOSTANDARD = "LVCMOS18";
-NET audio_out_i_audio_codec_adc_sdata1_pin LOC = "Y6" | IOSTANDARD = "LVCMOS18";
-NET audio_out_o_audio_codec_dmic0_1_pin LOC = "W7" | IOSTANDARD = "LVCMOS18";
-NET audio_out_o_audio_codec_dmic2_3_pin LOC = "Y5" | IOSTANDARD = "LVCMOS18";
-NET audio_out_on_audio_codec_power_down_pin LOC = "AF2" | IOSTANDARD = "LVCMOS18";
+#NET audio_out_o_audio_codec_lrclk_pin LOC = "AB7" | IOSTANDARD = "LVCMOS18" | DRIVE = 24;
+#NET audio_out_o_audio_codec_bclk_pin LOC = "AB5" | IOSTANDARD = "LVCMOS18" | DRIVE = 24;
+#NET audio_out_o_audio_codec_bclk_pin CLOCK_DEDICATED_ROUTE = FALSE;
+#NET audio_out_o_audio_codec_dac_sdata_pin LOC = "AA7" | IOSTANDARD = "LVCMOS18" | DRIVE = 24;
+#NET audio_out_i_audio_codec_adc_sdata0_pin LOC = "AA5" | IOSTANDARD = "LVCMOS18";
+#NET audio_out_i_audio_codec_adc_sdata1_pin LOC = "Y6" | IOSTANDARD = "LVCMOS18";
+#NET audio_out_o_audio_codec_dmic0_1_pin LOC = "W7" | IOSTANDARD = "LVCMOS18";
+#NET audio_out_o_audio_codec_dmic2_3_pin LOC = "Y5" | IOSTANDARD = "LVCMOS18";
+#NET audio_out_on_audio_codec_power_down_pin LOC = "AF2" | IOSTANDARD = "LVCMOS18";
 

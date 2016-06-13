@@ -33,14 +33,6 @@
  PORT sdcard_spi_MISO_pin = sdcard_spi_MISO, DIR = IO
  PORT sdcard_spi_MOSI_pin = sdcard_spi_MOSI, DIR = IO
  PORT sdcard_spi_SS_pin = sdcard_spi_SS, DIR = IO
- PORT audio_out_i_audio_codec_adc_sdata0_pin = net_audio_out_i_audio_codec_adc_sdata0_pin, DIR = I
- PORT audio_out_o_audio_codec_dac_sdata_pin = audio_out_o_audio_codec_dac_sdata, DIR = O
- PORT audio_out_o_audio_codec_bclk_pin = audio_out_o_audio_codec_bclk, DIR = O
- PORT audio_out_o_audio_codec_lrclk_pin = audio_out_o_audio_codec_lrclk, DIR = O
- PORT audio_out_i_audio_codec_adc_sdata1_pin = net_audio_out_i_audio_codec_adc_sdata1_pin, DIR = I
- PORT audio_out_o_audio_codec_dmic0_1_pin = audio_out_o_audio_codec_dmic0_1, DIR = O
- PORT audio_out_o_audio_codec_dmic2_3_pin = audio_out_o_audio_codec_dmic2_3, DIR = O
- PORT audio_out_on_audio_codec_power_down_pin = audio_out_on_audio_codec_power_down, DIR = O
 
 
 # PORT vga_periph_0_display_mode_i_pin = vga_periph_0_display_mode_i, DIR = I, VEC = [1:0]
@@ -144,7 +136,6 @@ BEGIN clock_generator
  PORT CLKOUT0 = clk_100_0000MHz
  PORT RST = RESET
  PORT CLKIN = CLK
- PORT CLKOUT1 = clock_generator_0_CLKOUT1
 END
 
 BEGIN axi_interconnect
@@ -219,26 +210,6 @@ BEGIN axi_spi
  PORT IP2INTC_Irpt = sdcard_spi_IP2INTC_Irpt
 END
 
-BEGIN axi_adau1772_i2s_ctrl
- PARAMETER INSTANCE = audio_out
- PARAMETER HW_VER = 1.00.a
- PARAMETER C_BASEADDR = 0x73800000
- PARAMETER C_HIGHADDR = 0x7380ffff
- BUS_INTERFACE S_AXI = axi4lite_0
- PORT S_AXI_ACLK = clk_100_0000MHz
- PORT i_clk_24MHz = clock_generator_0_CLKOUT1
- PORT o_audio_codec_lrclk = audio_out_o_audio_codec_lrclk
- PORT o_audio_codec_bclk = audio_out_o_audio_codec_bclk
- PORT o_audio_codec_dac_sdata = audio_out_o_audio_codec_dac_sdata
- PORT i_audio_codec_adc_sdata0 = net_audio_out_i_audio_codec_adc_sdata0_pin
- PORT i_audio_codec_adc_sdata1 = net_audio_out_i_audio_codec_adc_sdata1_pin
- PORT o_audio_codec_dmic0_1 = audio_out_o_audio_codec_dmic0_1
- PORT o_audio_codec_dmic2_3 = audio_out_o_audio_codec_dmic2_3
- PORT on_audio_codec_power_down = audio_out_on_audio_codec_power_down
- PORT in_reset = net_vcc
- PORT o_sample_interrupt = audio_out_o_sample_interrupt
-END
-
 BEGIN bram_block
  PARAMETER INSTANCE = microblaze_0_bram_block_1
  PARAMETER HW_VER = 1.00.a
@@ -296,6 +267,6 @@ BEGIN axi_intc
  PARAMETER C_HIGHADDR = 0x4120ffff
  BUS_INTERFACE S_AXI = axi4lite_0
  PORT S_AXI_ACLK = clk_100_0000MHz
- PORT Intr = audio_out_o_sample_interrupt & sdcard_spi_IP2INTC_Irpt
+ PORT Intr = sdcard_spi_IP2INTC_Irpt
 END
 
