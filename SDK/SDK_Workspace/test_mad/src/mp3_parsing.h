@@ -81,4 +81,6 @@ int mp3_sample_freq(MP3HEADER h);
  */
 MP3HEADER parse_mp3_header(const uint8_t* data);
 
+MP3ID3TAG1 parse_mp3_header2(const uint8_t* data);
+
 #endif /* MP3_PARSING_H_ */

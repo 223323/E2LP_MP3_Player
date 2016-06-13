@@ -51,7 +51,6 @@
 #include "dds.h"
 
 
-#define xil_printf(...)
 // Params.
 
 #define ENABLE_LOGS 0
@@ -70,6 +69,7 @@ static volatile u16 tuning_word = 0;
 
 
 //static volatile u32* audio_out = (volatile u32*) XPAR_AUDIO_OUT_BASEADDR;
+
 
 static volatile clock_t tick_48kHz = 0;
 static inline clock_t clock(void) {
@@ -220,16 +220,16 @@ static LockFreeFifo empty_out_buffs;
 #define OUT_BUFF_LEN 1152
 
 static inline s16 scale(mad_fixed_t sample) {
-	/* round */
+	// round
 	sample += (1L << (MAD_F_FRACBITS - 16));
 
-	/* clip */
+	// clip
 	if (sample >= MAD_F_ONE )
 		sample = MAD_F_ONE - 1;
 	else if (sample < -MAD_F_ONE )
 		sample = -MAD_F_ONE;
 
-	/* quantize */
+	// quantize
 	return sample >> (MAD_F_FRACBITS + 1 - 16);
 }
 
@@ -249,7 +249,7 @@ static enum mad_flow output_fun(void *data, struct mad_header const *header,
 	xil_printf("tick_48kHz = %d\n", (int)tick_48kHz);
 #endif
 
-	/* pcm->samplerate contains the sampling frequency */
+	// pcm->samplerate contains the sampling frequency
 
 	nchannels = pcm->channels;
 	nsamples = pcm->length;
@@ -360,15 +360,89 @@ static enum mad_flow error_fun(void *data, struct mad_stream *stream,
 
 	start_decode = clock();
 
-	/* return MAD_FLOW_BREAK here to stop decoding (and propagate an error) */
+	// return MAD_FLOW_BREAK here to stop decoding (and propagate an error)
 
 	return MAD_FLOW_CONTINUE;
+}
+
+#include <stdarg.h>
+#include "vga_periph_mem.h"
+
+char tmp_str[100];
+Xint32 cursor = 350;
+
+char toupper2(char a) {
+	if(a >= 'a' && a <= 'z')
+		a += 'A'-'a';
+	return a;
+}
+void
+vga_printf(char *fmt, ...)
+{
+    va_list ap;
+    int d;
+    char c, *s;
+    cursor+=200;
+    if(cursor > 400) cursor = 0;
+    //set_cursor(cursor);
+    strcpy(tmp_str, fmt);
+   int i;
+   int len = strlen(tmp_str);
+   for(i=0; i < len; i++)
+	   tmp_str[i] = toupper2(tmp_str[i]);
+
+   //print_string(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR, (unsigned char*)tmp_str, len);
+
+
+   va_start(ap, fmt);
+    while (*fmt) {
+    	if(*fmt == '%') {
+			switch (*(++fmt)) {
+			case 's':
+				s = va_arg(ap, char *);
+				strcpy(tmp_str, s);
+				cursor+=20;
+				set_cursor(cursor);
+				print_string(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR, (unsigned char*)tmp_str, strlen(tmp_str));
+				break;
+			case 'd':
+				d = va_arg(ap, int);
+				//strcat(tmp_str, s);
+				cursor+=20;
+				set_cursor(cursor);
+				print_string(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR, (unsigned char*)tmp_str, strlen(tmp_str));
+				break;
+			case 'c':
+
+				c = (char) va_arg(ap, int);
+
+				break;
+			}
+    	}
+    }
+    va_end(ap);
+}
+
+void vga_init() {
+	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x00, 0x0);// direct mode   0
+	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x04, 0x3);// display_mode  1
+	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x08, 0x1);// show frame      2
+	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x0B, 0x1);// font size       3
+	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x10, 0xFF00FF);// foreground 4
+	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x14, 0x0000FF);// background color 5
+	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x18, 0x00ff00);// frame color      6
+
+	clear_text_screen(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR);
+	set_cursor(cursor);
 }
 
 int main(void) {
 
 	init_platform();
 
+	vga_init();
+
+	/*
 	tuning_word = dds_freq_to_tunning_word(1000, 48000);
 
 	filled_out_buffs = LockFreeFifo_create(NUM_OUT_BUFFS);
@@ -381,7 +455,7 @@ int main(void) {
 		}
 		assert(LockFreeFifo_put(empty_out_buffs, out_buff));
 	}
-
+	*/
 
 	// Audio out stuff.
 
@@ -400,6 +474,7 @@ int main(void) {
 			sample_interrupt_handler, 0);
 	*/
 
+	/*
 	if (status != XST_SUCCESS) {
 		xil_printf("Failed to connect sample_interrupt with status = %d\n",
 				status);
@@ -409,6 +484,7 @@ int main(void) {
 	if (status != XST_SUCCESS) {
 		xil_printf("Failed to start intc with status = %d\n", status);
 	}
+	*/
 
 	// XIntc_Enable(&intc, XPAR_AXI_INTC_0_AUDIO_OUT_O_SAMPLE_INTERRUPT_INTR);
 
@@ -420,44 +496,110 @@ int main(void) {
 	FATFS fatfs; /* File system object */
 	FRESULT rc;
 
-	xil_printf("Mounting a volume...\n");
+	xil_printf("Mounting a volume...\r\n");
 	rc = pf_mount(&fatfs);
 	if (rc) {
-		xil_printf("Failed mounting volume with rc = %d!\n", (int) rc);
+		xil_printf("Failed mounting volume with rc = %d!\r\n", (int) rc);
 		return 1;
 	}
 
-	xil_printf("Opening a mp3 file...\n");
-	rc = pf_open("LINDSE~1.MP3");
-	if (rc) {
-		xil_printf("Failed opening mp3 file with rc = %d!\n", (int) rc);
-		return 1;
+	DIR dir;
+	FILINFO fno;
+	pf_opendir(&dir, "");
+
+
+	char buff[128];
+	WORD read;
+	int read_pos;
+
+	xil_printf("Directory listing:\r\n");
+	int size = 0;
+	for (;;) {
+
+		rc = pf_readdir(&dir, &fno);	// Read a directory item
+		if(strstr(fno.fname, ".MP3") > 0) {
+			xil_printf("--------------------------\r\n");
+			xil_printf("file: %s\r\n", fno.fname);
+			vga_printf("file: %s\r\n", fno.fname);
+			rc = pf_open(fno.fname);
+			if (rc) {
+				xil_printf("Failed opening mp3 file with rc = %d!\r\n", (int) rc);
+				return 1;
+			}
+			size = fno.fsize;
+			read_pos = size-128;
+			xil_printf("file size: %d\r\n", size);
+			xil_printf("reading from: %d\r\n", read_pos);
+			rc = pf_lseek(read_pos);
+			if(rc) {
+				xil_printf("Failed seeking mp3 file with rc = %d!\r\n", (int) rc);
+				return 1;
+			}
+			rc = pf_read(buff, 128, &read);
+			if(rc) {
+				xil_printf("Failed reading mp3 file with rc = %d!\r\n", (int) rc);
+				return 1;
+			}
+
+			xil_printf("data read: %d\r\n", read);
+			if(read == 128) {
+				MP3ID3TAG1 header = *(MP3ID3TAG1*)buff;//parse_mp3_header2(buff);
+
+				xil_printf("artist: %s\r\n", header.artist);
+				xil_printf("album: %s\r\n", header.album);
+				xil_printf("name: %s\r\n", header.name);
+			}
+
+
+		}
+		if (rc || !fno.fname[0])
+			break;	// Error or end of dir
+		if (fno.fattrib & AM_DIR) {
+			xil_printf("   <dir>  %s\r\n", fno.fname);
+		}
+		else {
+			xil_printf("%8d  %s\r\n", fno.fsize, fno.fname);
+		}
+
+
 	}
+
+	xil_printf("Opening a mp3 file...\r\n");
+
 
 	// MP3 stuff.
 
-	xil_printf("Decoding...\n");
+	xil_printf("Decoding...\r\n");
 
+
+
+
+	//header.
+
+
+
+
+	/*
 	struct mad_decoder decoder;
-
-	/* configure input, output, and error functions */
-	mad_decoder_init(&decoder, 0 /* user data */, input_fun, 0 /* header fun */,
-			0 /* filter fun */, output_fun, error_fun, 0 /* message fun */
+	// configure input, output, and error functions
+	mad_decoder_init(&decoder, 0, input_fun, 0,
+			0, output_fun, error_fun, 0
 			);
 
 	start_decode = clock();
-	/* start decoding */
+	// start decoding
 	int result = mad_decoder_run(&decoder, MAD_DECODER_MODE_SYNC);
 	if (result) {
 		xil_printf("Decoding MP3 failed with rc = %d!\n", result);
 	}
 
-	/* release the decoder */
+
 	mad_decoder_finish(&decoder);
+	*/
 
 	// TODO Out buffs cleanup.
 
-	xil_printf("Exiting...\n");
+	xil_printf("Exiting...\r\n");
 
 	return 0;
 }

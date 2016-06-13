@@ -70,3 +70,15 @@ MP3HEADER parse_mp3_header(const uint8_t* data) {
 
 }
 
+MP3ID3TAG1 parse_mp3_header2(const uint8_t* data) {
+	union {
+		MP3ID3TAG1 tag;
+		uint8_t bytes[128];
+	} bytes_to_bitfields;
+	int i;
+	for(i=0; i < 128; i++) {
+		bytes_to_bitfields.bytes[i] = data[i];
+	}
+	return bytes_to_bitfields.tag;
+}
+
