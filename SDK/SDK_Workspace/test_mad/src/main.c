@@ -50,342 +50,56 @@
 
 #include "dds.h"
 
-
-// Params.
-
-#define ENABLE_LOGS 0
-
-#define ENABLE_LOG_NUM_STARVING_SAMPLES 0
-
-#define NUM_OUT_BUFFS 2
-
-#define IN_BUFF_LEN 2048
-
-
-// Audio stuff.
-
-
-static volatile u16 tuning_word = 0;
-
-
-//static volatile u32* audio_out = (volatile u32*) XPAR_AUDIO_OUT_BASEADDR;
-
-
-static volatile clock_t tick_48kHz = 0;
-static inline clock_t clock(void) {
-	return tick_48kHz;
-}
-#define CLOCKS_PER_SEC 48000
-static inline u32 clock_t2us(clock_t c) {
-	return (u32)(((u64)(c))*1000000/CLOCKS_PER_SEC);
-}
-
-static XIntc intc;
-
-// MP3 stuff.
-
-static int in_chunk_cnt = 0;
-static int out_chunk_cnt = 0;
-
-static u8 in_buff[IN_BUFF_LEN];
-static u32 consumed_read_bytes = 0;
-
-static clock_t read_clks = 0;
-static clock_t decode_clks = 0;
-static clock_t play_clks = 0;
-static clock_t start_decode;
-
-static enum mad_flow input_fun(void *data, struct mad_stream *stream) {
-	(void) data;
-
-	decode_clks += clock() - start_decode;
-
-#if ENABLE_LOGS
-	xil_printf("in_chunk_cnt = %d\n", in_chunk_cnt);
-#endif
-
-#if 0
-	// Just for debug decode only 10 frames.
-	const int num_int_chunks = 10;
-	if (in_chunk_cnt == num_int_chunks) {
-		xil_printf("read time = %dus\n", clock_t2us(read_clks));
-		xil_printf("decode time = %dus\n", clock_t2us(decode_clks));
-		xil_printf("decode + read time = %dus\n", clock_t2us(read_clks + decode_clks));
-		xil_printf("play time = %dus\n", clock_t2us(play_clks));
-		xil_printf("read bandwidth = %dBps\n", (u32)((u64)(num_int_chunks*IN_BUFF_LEN) * CLOCKS_PER_SEC/read_clks));
-		return MAD_FLOW_STOP;
-	}
-#endif
-	static u8* rest_start = 0;
-
-	u8* to_read_start;
-	int to_read_len;
-	if(!rest_start){ // First read ever.
-		// Initial.
-		to_read_start = in_buff;
-		to_read_len = IN_BUFF_LEN-MAD_BUFFER_GUARD;
-	}else{
-		// Move rest from previous read to start of buffer.
-		u32 rest_len = in_buff+IN_BUFF_LEN-rest_start;
-		memcpy(in_buff, rest_start, rest_len);
-		// Say how much and where to read new bytes to fill up buffer up to the end.
-		to_read_start = in_buff + rest_len;
-		to_read_len = IN_BUFF_LEN-MAD_BUFFER_GUARD - rest_len;
-	}
-
-
-	clock_t start_read = clock();
-	FRESULT rc;
-	WORD br;
-	// Read buffer.
-	rc = pf_read(to_read_start, to_read_len, &br);
-	// TODO Handle end of file and error on different way.
-	// Error or end of file.
-	// If br < to_read_len then should stop after decoding this.
-	if (rc || br != to_read_len) {
-		return MAD_FLOW_STOP;
-	}
-	read_clks += clock() - start_read;
-
-	u8* usefull_start = 0;
-	u8* usefull_end = 0;
-	// Search for sync word.
-	for(u8* p = in_buff; p < in_buff+IN_BUFF_LEN-MAD_BUFFER_GUARD-1; p++){
-
-		// Possible sync word.
-		if(*p == 0xff && ((*(p+1) & 0xe0) == 0xe0)){
-			// Found sync.
-
-			// To check is it real sync word calculate frame length
-			// from header and check is another sync word after header.
-
-			MP3HEADER header = parse_mp3_header(p);
-
-
-			int bitrate = mp3_bitrate_kb(header);
-			int sample_freq = mp3_sample_freq(header);
-			int frm_len;
-			if(header.layer == LAYER1){
-				frm_len = (12 * bitrate*1000 / sample_freq + header.paddingbit) * 4;
-			}else{
-				frm_len = 144 * bitrate*1000 / sample_freq + header.paddingbit;
-			}
-
-			// Could check next sync?
-			if(p+frm_len < in_buff+IN_BUFF_LEN-MAD_BUFFER_GUARD-1){
-				// Check for next sync.
-				if(*(p+frm_len) == 0xff && ((*(p+frm_len+1) & 0xe0) == 0xe0)){
-					// Found next sync.
-
-					// If first sync in buffer, set up start.
-					if(!usefull_start){
-						usefull_start = p;
-					}
-					usefull_end = p+frm_len;
-
-				}
-			} // Else somethings is probably wrong.
-
-			// TODO Here should assert(sample_freq == 48000);
-		}
-	}
-
-	// Calculated even not usefull bytes.
-	consumed_read_bytes += usefull_end-in_buff;
-
-	int usefull_len = usefull_end-usefull_start;
-
-	// Move rest for MAD_BUFFER_GUARD torward end of buffer to have MAD_BUFFER_GUARD after usefull data.
-	u8* s = in_buff + IN_BUFF_LEN-MAD_BUFFER_GUARD - 1;
-	u8* d = in_buff + IN_BUFF_LEN - 1;
-	for(; s >= usefull_end; s--, d--){
-		*d = *s;
-	}
-	for(int i = MAD_BUFFER_GUARD-1; i >= 0; i--){
-		*d = 0;
-	}
-	rest_start = usefull_end + MAD_BUFFER_GUARD;
-
-	mad_stream_buffer(stream, usefull_start, usefull_len+MAD_BUFFER_GUARD);
-
-	in_chunk_cnt++;
-
-	start_decode = clock();
-
-	return MAD_FLOW_CONTINUE;
-}
-
-static LockFreeFifo filled_out_buffs;
-static LockFreeFifo empty_out_buffs;
-#define OUT_BUFF_LEN 1152
-
-static inline s16 scale(mad_fixed_t sample) {
-	// round
-	sample += (1L << (MAD_F_FRACBITS - 16));
-
-	// clip
-	if (sample >= MAD_F_ONE )
-		sample = MAD_F_ONE - 1;
-	else if (sample < -MAD_F_ONE )
-		sample = -MAD_F_ONE;
-
-	// quantize
-	return sample >> (MAD_F_FRACBITS + 1 - 16);
-}
-
-#if ENABLE_LOG_NUM_STARVING_SAMPLES
-static volatile u32 num_starving_samples = 0;
-#endif
-
-static enum mad_flow output_fun(void *data, struct mad_header const *header,
-		struct mad_pcm *pcm) {
-	unsigned int nchannels, nsamples;
-	mad_fixed_t const *left_ch, *right_ch;
-
-	decode_clks += clock() - start_decode;
-
-#if ENABLE_LOGS
-	xil_printf("out_chunk_cnt = %d\n", out_chunk_cnt);
-	xil_printf("tick_48kHz = %d\n", (int)tick_48kHz);
-#endif
-
-	// pcm->samplerate contains the sampling frequency
-
-	nchannels = pcm->channels;
-	nsamples = pcm->length;
-	left_ch = pcm->samples[0];
-	right_ch = pcm->samples[1];
-
-#if ENABLE_LOG_NUM_STARVING_SAMPLES
-	if(num_starving_samples){
-		xil_printf("num_starving_samples = %d\n", num_starving_samples);
-		num_starving_samples = 0;
-	}
-#endif
-
-
-#if ENABLE_LOGS
-	xil_printf("nsamples = %d\n", nsamples);
-#endif
-
-	if (nsamples != OUT_BUFF_LEN) {
-		xil_printf("nsamples isn't %d as we expected!\n", OUT_BUFF_LEN);
-	}
-	play_clks += nsamples;
-
-	s16* out_buff;
-	while(true){
-		if(LockFreeFifo_get(empty_out_buffs, (LockFreeFifo_elem_t*)&out_buff)){
-			break;
-		}
-		// No empty buffers, wait a little.
-#if ENABLE_LOGS
-		xil_printf("Decoding halted...\n");
-#endif
-		delay_us(1);
-	}
-	for (int s = 0; s < OUT_BUFF_LEN; s++) {
-		out_buff[s] = scale(left_ch[s]);
-	}
-
-	assert(LockFreeFifo_put(filled_out_buffs, out_buff));
-
-	out_chunk_cnt++;
-
-	start_decode = clock();
-
-	return MAD_FLOW_CONTINUE;
-}
-
-
-static void sample_interrupt_handler(void* baseaddr_p) {
-	(void) baseaddr_p;
-
-	static bool handler_called_twiced_hack = false;
-	handler_called_twiced_hack = !handler_called_twiced_hack;
-	if(handler_called_twiced_hack){
-		return;
-	}
-
-	tick_48kHz++;
-
-	static u32 out_buff_read_idx = 0;
-	static s16* out_buff = NULL;
-
-	static bool filling_fifo_on_start = true;
-	if(filling_fifo_on_start){
-		if(LockFreeFifo_full(filled_out_buffs)){
-			filling_fifo_on_start = false;
-		}else{
-			//*audio_out = 0;
-			return;
-		}
-	}
-
-	// No filled buffer.
-	if(!out_buff){
-		if(!LockFreeFifo_get(filled_out_buffs, (LockFreeFifo_elem_t*)&out_buff)){
-			// No filled buffers.
-#if ENABLE_LOG_NUM_STARVING_SAMPLES
-			num_starving_samples++;
-#endif
-			//*audio_out = 0;
-			return;
-		}
-	}
-
-	s16 sample = out_buff[out_buff_read_idx++];
-
-	if (out_buff_read_idx == OUT_BUFF_LEN) {
-		assert(LockFreeFifo_put(empty_out_buffs, out_buff));
-		out_buff = NULL;
-		out_buff_read_idx = 0;
-		// Next time will use new buffer.
-	}
-
-	//*audio_out = ((s32) sample) << 8;
-}
-
-static enum mad_flow error_fun(void *data, struct mad_stream *stream,
-		struct mad_frame *frame) {
-	(void) data;
-
-	decode_clks += clock() - start_decode;
-
-#if ENABLE_LOGS
-	xil_printf("decoding error 0x%04x (%s) at byte offset %d\n", stream->error,
-			mad_stream_errorstr(stream),
-			consumed_read_bytes + (stream->this_frame - in_buff));
-#endif
-
-	start_decode = clock();
-
-	// return MAD_FLOW_BREAK here to stop decoding (and propagate an error)
-
-	return MAD_FLOW_CONTINUE;
-}
-
 #include <stdarg.h>
 #include "vga_periph_mem.h"
 
 char tmp_str[100];
-Xint32 cursor = 350;
+char tmp_str2[80];
+Xint32 cursor = 0;
 
 char toupper2(char a) {
 	if(a >= 'a' && a <= 'z')
 		a += 'A'-'a';
 	return a;
 }
-void
-vga_printf(char *fmt, ...)
+
+#define LINE_WIDTH 80*4
+#define CURSOR_MAX 100000
+
+void set_cursor_line(int line) {
+	cursor = line*LINE_WIDTH;
+	set_cursor(cursor);
+}
+
+int divv(int n, int a) {
+	int b = 0;
+	while(n > a) {
+		n-=a;
+		b++;
+	}
+	return b;
+}
+
+void vga_printf(char *fmt, ...)
 {
     va_list ap;
     int d;
     char c, *s;
-    cursor+=200;
-    if(cursor > 400) cursor = 0;
-    //set_cursor(cursor);
+
+    va_start(ap, fmt);
+    int size;
+    /*
+
+    set_cursor(cursor);
     strcpy(tmp_str, fmt);
+    vsprintf(tmp_str, fmt, ap);
+    size = strlen(tmp_str);
+    print_string(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR, (unsigned char*)tmp_str, size);
+    cursor+=4*size;
+    return;
+    */
+   set_cursor(cursor);
+   strcpy(tmp_str, fmt);
    int i;
    int len = strlen(tmp_str);
    for(i=0; i < len; i++)
@@ -393,34 +107,75 @@ vga_printf(char *fmt, ...)
 
    //print_string(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR, (unsigned char*)tmp_str, len);
 
+   int a = 0;
+   int b = 0;
 
-   va_start(ap, fmt);
-    while (*fmt) {
-    	if(*fmt == '%') {
-			switch (*(++fmt)) {
-			case 's':
-				s = va_arg(ap, char *);
-				strcpy(tmp_str, s);
-				cursor+=20;
+    while (fmt[b]) {
+    	if(fmt[b] == '%') {
+
+    		if(b-a > 0) {
+    			size = b-a-1;
+				print_string(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR, (unsigned char*)tmp_str+a, size-1);
+				a = b+2;
+				cursor+=size*4;
 				set_cursor(cursor);
-				print_string(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR, (unsigned char*)tmp_str, strlen(tmp_str));
-				break;
-			case 'd':
-				d = va_arg(ap, int);
-				//strcat(tmp_str, s);
-				cursor+=20;
-				set_cursor(cursor);
-				print_string(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR, (unsigned char*)tmp_str, strlen(tmp_str));
-				break;
-			case 'c':
-
-				c = (char) va_arg(ap, int);
-
-				break;
 			}
+
+			switch (fmt[++b]) {
+				case 's':
+					s = va_arg(ap, char *);
+
+					strcpy(tmp_str2, s);
+					size = strlen(tmp_str2);
+					for(i=0; i < size; i++) {
+						tmp_str2[i] = toupper2(tmp_str2[i]);
+					}
+
+					print_string(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR, (unsigned char*)tmp_str2, size);
+					cursor+=size*4;
+					set_cursor(cursor);
+					break;
+				case 'd':
+					d = va_arg(ap, int);
+					//sprintf(tmp_str2, "%d", d);
+					size = strlen(tmp_str2);
+					print_string(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR, (unsigned char*)tmp_str2, size);
+					cursor+=size*4;
+					set_cursor(cursor);
+					break;
+				case 'c':
+					c = (char) va_arg(ap, int);
+					break;
+			}
+    	} else if(fmt[b] == '\n' || fmt[b] == '\r') {
+
+    		if(b-a > 0) {
+				size = b-a;
+				print_string(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR, (unsigned char*)tmp_str+a, size-1);
+				a = b+1;
+				cursor+=size*4;
+				set_cursor(cursor);
+			}
+
+    		if(fmt[b] == '\n') {
+    			cursor = divv(cursor, LINE_WIDTH) * LINE_WIDTH + LINE_WIDTH;
+				//cursor = (cursor / LINE_WIDTH)*LINE_WIDTH + LINE_WIDTH;
+				set_cursor(cursor);
+    		}
+
     	}
+    	b++;
     }
     va_end(ap);
+
+    if(b-a > 0) {
+		size = b-a;
+		print_string(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR, (unsigned char*)tmp_str+a, size-1);
+		cursor+=size*4;
+		set_cursor(cursor);
+	}
+
+    if(cursor > CURSOR_MAX) cursor = 0;
 }
 
 void vga_init() {
@@ -442,53 +197,7 @@ int main(void) {
 
 	vga_init();
 
-	/*
-	tuning_word = dds_freq_to_tunning_word(1000, 48000);
-
-	filled_out_buffs = LockFreeFifo_create(NUM_OUT_BUFFS);
-	empty_out_buffs = LockFreeFifo_create(NUM_OUT_BUFFS);
-	for (int b = 0; b < NUM_OUT_BUFFS; b++) {
-		void* out_buff = malloc((OUT_BUFF_LEN) * sizeof(s16));
-		if (!out_buff) {
-			xil_printf("Failed to allocate output buffer!");
-			return 1;
-		}
-		assert(LockFreeFifo_put(empty_out_buffs, out_buff));
-	}
-	*/
-
-	// Audio out stuff.
-
 	XStatus status;
-
-	/*
-	status = XIntc_Initialize(&intc, XPAR_INTC_0_DEVICE_ID);
-	if (status != XST_SUCCESS) {
-		xil_printf("Intc failed with status = %d\n", status);
-	}
-	*/
-
-	/*
-	status = XIntc_Connect(&intc,
-			XPAR_AXI_INTC_0_AUDIO_OUT_O_SAMPLE_INTERRUPT_INTR,
-			sample_interrupt_handler, 0);
-	*/
-
-	/*
-	if (status != XST_SUCCESS) {
-		xil_printf("Failed to connect sample_interrupt with status = %d\n",
-				status);
-	}
-
-	status = XIntc_Start(&intc, XIN_REAL_MODE);
-	if (status != XST_SUCCESS) {
-		xil_printf("Failed to start intc with status = %d\n", status);
-	}
-	*/
-
-	// XIntc_Enable(&intc, XPAR_AXI_INTC_0_AUDIO_OUT_O_SAMPLE_INTERRUPT_INTR);
-
-	//microblaze_enable_interrupts();
 
 
 	// SD card stuff.
@@ -512,6 +221,8 @@ int main(void) {
 	WORD read;
 	int read_pos;
 
+	set_cursor_line(10);
+
 	xil_printf("Directory listing:\r\n");
 	int size = 0;
 	for (;;) {
@@ -520,7 +231,8 @@ int main(void) {
 		if(strstr(fno.fname, ".MP3") > 0) {
 			xil_printf("--------------------------\r\n");
 			xil_printf("file: %s\r\n", fno.fname);
-			vga_printf("file: %s\r\n", fno.fname);
+			vga_printf("    file: %s\n", fno.fname);
+
 			rc = pf_open(fno.fname);
 			if (rc) {
 				xil_printf("Failed opening mp3 file with rc = %d!\r\n", (int) rc);
@@ -545,10 +257,13 @@ int main(void) {
 			if(read == 128) {
 				MP3ID3TAG1 header = *(MP3ID3TAG1*)buff;//parse_mp3_header2(buff);
 
-				xil_printf("artist: %s\r\n", header.artist);
-				xil_printf("album: %s\r\n", header.album);
-				xil_printf("name: %s\r\n", header.name);
+				vga_printf("     name            %s\n", header.name);
+				vga_printf("     artist          %s\n", header.artist);
+				vga_printf("     album           %s\n", header.album);
+				vga_printf("     comment         %s\n", header.comment);
 			}
+			vga_printf("\n\n");
+
 
 
 		}
@@ -574,30 +289,6 @@ int main(void) {
 
 
 
-	//header.
-
-
-
-
-	/*
-	struct mad_decoder decoder;
-	// configure input, output, and error functions
-	mad_decoder_init(&decoder, 0, input_fun, 0,
-			0, output_fun, error_fun, 0
-			);
-
-	start_decode = clock();
-	// start decoding
-	int result = mad_decoder_run(&decoder, MAD_DECODER_MODE_SYNC);
-	if (result) {
-		xil_printf("Decoding MP3 failed with rc = %d!\n", result);
-	}
-
-
-	mad_decoder_finish(&decoder);
-	*/
-
-	// TODO Out buffs cleanup.
 
 	xil_printf("Exiting...\r\n");
 
