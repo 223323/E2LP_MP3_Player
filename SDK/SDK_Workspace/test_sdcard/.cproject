@@ -36,7 +36,7 @@
 								<option id="xilinx.gnu.mb.compiler.inferred.usepcmp.1336979223" name="Use Pattern Compare (-mxl-pattern-compare)" superClass="xilinx.gnu.mb.compiler.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.compiler.inferred.mul.270201750" name="Hardware Multiplier" superClass="xilinx.gnu.mb.compiler.inferred.mul" value="xilinx.gnu.mb.compiler.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.compiler.inferred.swplatform.includes.898477382" name="Software Platform Include Path" superClass="xilinx.gnu.compiler.inferred.swplatform.includes" valueType="includePath">
-									<listOptionValue builtIn="false" value="../../helloworld_bsp/microblaze_0/include"/>
+									<listOptionValue builtIn="false" value="C:/materija/ra248-2013/E2LP_MP3_Player/E2LP_MP3_Player_XPS_Project/SDK/SDK_Workspace/standalone_bsp_0/microblaze_0/include"/>
 								</option>
 								<option id="xilinx.gnu.compiler.dircategory.includes.1525093915" name="Include Paths" superClass="xilinx.gnu.compiler.dircategory.includes" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/pff}&quot;"/>
@@ -56,7 +56,7 @@
 								<option id="xilinx.gnu.mb.compiler.inferred.usepcmp.1573924552" name="Use Pattern Compare (-mxl-pattern-compare)" superClass="xilinx.gnu.mb.compiler.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.compiler.inferred.mul.410878481" name="Hardware Multiplier" superClass="xilinx.gnu.mb.compiler.inferred.mul" value="xilinx.gnu.mb.compiler.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.compiler.inferred.swplatform.includes.951904208" name="Software Platform Include Path" superClass="xilinx.gnu.compiler.inferred.swplatform.includes" valueType="includePath">
-									<listOptionValue builtIn="false" value="../../helloworld_bsp/microblaze_0/include"/>
+									<listOptionValue builtIn="false" value="C:/materija/ra248-2013/E2LP_MP3_Player/E2LP_MP3_Player_XPS_Project/SDK/SDK_Workspace/standalone_bsp_0/microblaze_0/include"/>
 								</option>
 								<option id="xilinx.gnu.compiler.dircategory.includes.389085176" name="Include Paths" superClass="xilinx.gnu.compiler.dircategory.includes" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/pff}&quot;"/>
@@ -74,7 +74,7 @@
 								<option id="xilinx.gnu.mb.linker.inferred.usepcmp.746886636" name="Use Pattern Compare (-mxl-pattern-compare)" superClass="xilinx.gnu.mb.linker.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.linker.inferred.mul.1359530670" name="Hardware Multiplier" superClass="xilinx.gnu.mb.linker.inferred.mul" value="xilinx.gnu.mb.linker.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.linker.inferred.swplatform.lpath.1165000419" name="Software Platform Library Path" superClass="xilinx.gnu.linker.inferred.swplatform.lpath" valueType="libPaths">
-									<listOptionValue builtIn="false" value="../../helloworld_bsp/microblaze_0/lib"/>
+									<listOptionValue builtIn="false" value="C:/materija/ra248-2013/E2LP_MP3_Player/E2LP_MP3_Player_XPS_Project/SDK/SDK_Workspace/standalone_bsp_0/microblaze_0/lib"/>
 								</option>
 								<option id="xilinx.gnu.linker.inferred.swplatform.flags.1372205618" name="Software Platform Inferred Flags" superClass="xilinx.gnu.linker.inferred.swplatform.flags" valueType="libs">
 									<listOptionValue builtIn="false" value="-Wl,--start-group,-lxil,-lgcc,-lc,--end-group"/>
@@ -96,7 +96,7 @@
 								<option id="xilinx.gnu.mb.linker.inferred.usepcmp.302584709" name="Use Pattern Compare (-mxl-pattern-compare)" superClass="xilinx.gnu.mb.linker.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.linker.inferred.mul.916554814" name="Hardware Multiplier" superClass="xilinx.gnu.mb.linker.inferred.mul" value="xilinx.gnu.mb.linker.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.linker.inferred.swplatform.lpath.1291705048" name="Software Platform Library Path" superClass="xilinx.gnu.linker.inferred.swplatform.lpath" valueType="libPaths">
-									<listOptionValue builtIn="false" value="../../helloworld_bsp/microblaze_0/lib"/>
+									<listOptionValue builtIn="false" value="C:/materija/ra248-2013/E2LP_MP3_Player/E2LP_MP3_Player_XPS_Project/SDK/SDK_Workspace/standalone_bsp_0/microblaze_0/lib"/>
 								</option>
 								<option id="xilinx.gnu.linker.inferred.swplatform.flags.1481512865" name="Software Platform Inferred Flags" superClass="xilinx.gnu.linker.inferred.swplatform.flags" valueType="libs">
 									<listOptionValue builtIn="false" value="-Wl,--start-group,-lxil,-lgcc,-lc,--end-group"/>
@@ -106,7 +106,7 @@
 							</tool>
 							<tool id="xilinx.gnu.mb.size.debug.1829568343" name="MicroBlaze Print Size" superClass="xilinx.gnu.mb.size.debug"/>
 							<tool id="xilinx.elfcheck.mb.debug.1915189175" name="Xilinx ELF Check" superClass="xilinx.elfcheck.mb.debug">
-								<option id="xilinx.elfcheck.option.hwspec.1143907971" name="Hardware Specification" superClass="xilinx.elfcheck.option.hwspec" value="-hw ../../lab5-master_hw_platform/system.xml" valueType="string"/>
+								<option id="xilinx.elfcheck.option.hwspec.1143907971" name="Hardware Specification" superClass="xilinx.elfcheck.option.hwspec" value="-hw C:/materija/ra248-2013/E2LP_MP3_Player/E2LP_MP3_Player_XPS_Project/SDK/SDK_Workspace/lab5-master_hw_platform/system.xml" valueType="string"/>
 								<option id="xilinx.elfcheck.option.procname.1089810723" name="Processor Name" superClass="xilinx.elfcheck.option.procname" value="-pe microblaze_0" valueType="string"/>
 							</tool>
 						</toolChain>
@@ -146,7 +146,7 @@
 								<option id="xilinx.gnu.mb.compiler.inferred.usepcmp.2104839907" name="Use Pattern Compare (-mxl-pattern-compare)" superClass="xilinx.gnu.mb.compiler.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.compiler.inferred.mul.808272139" name="Hardware Multiplier" superClass="xilinx.gnu.mb.compiler.inferred.mul" value="xilinx.gnu.mb.compiler.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.compiler.inferred.swplatform.includes.2008258638" name="Software Platform Include Path" superClass="xilinx.gnu.compiler.inferred.swplatform.includes" valueType="includePath">
-									<listOptionValue builtIn="false" value="../../helloworld_bsp/microblaze_0/include"/>
+									<listOptionValue builtIn="false" value="C:/materija/ra248-2013/E2LP_MP3_Player/E2LP_MP3_Player_XPS_Project/SDK/SDK_Workspace/standalone_bsp_0/microblaze_0/include"/>
 								</option>
 								<option id="xilinx.gnu.compiler.dircategory.includes.447775471" name="Include Paths" superClass="xilinx.gnu.compiler.dircategory.includes" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/pff}&quot;"/>
@@ -164,7 +164,7 @@
 								<option id="xilinx.gnu.mb.compiler.inferred.usepcmp.2020222311" name="Use Pattern Compare (-mxl-pattern-compare)" superClass="xilinx.gnu.mb.compiler.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.compiler.inferred.mul.809429621" name="Hardware Multiplier" superClass="xilinx.gnu.mb.compiler.inferred.mul" value="xilinx.gnu.mb.compiler.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.compiler.inferred.swplatform.includes.746692362" name="Software Platform Include Path" superClass="xilinx.gnu.compiler.inferred.swplatform.includes" valueType="includePath">
-									<listOptionValue builtIn="false" value="../../helloworld_bsp/microblaze_0/include"/>
+									<listOptionValue builtIn="false" value="C:/materija/ra248-2013/E2LP_MP3_Player/E2LP_MP3_Player_XPS_Project/SDK/SDK_Workspace/standalone_bsp_0/microblaze_0/include"/>
 								</option>
 								<option id="xilinx.gnu.compiler.dircategory.includes.1342764922" name="Include Paths" superClass="xilinx.gnu.compiler.dircategory.includes" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/pff}&quot;"/>
@@ -180,7 +180,7 @@
 								<option id="xilinx.gnu.mb.linker.inferred.usepcmp.2068412638" name="Use Pattern Compare (-mxl-pattern-compare)" superClass="xilinx.gnu.mb.linker.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.linker.inferred.mul.628103400" name="Hardware Multiplier" superClass="xilinx.gnu.mb.linker.inferred.mul" value="xilinx.gnu.mb.linker.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.linker.inferred.swplatform.lpath.645938338" name="Software Platform Library Path" superClass="xilinx.gnu.linker.inferred.swplatform.lpath" valueType="libPaths">
-									<listOptionValue builtIn="false" value="../../helloworld_bsp/microblaze_0/lib"/>
+									<listOptionValue builtIn="false" value="C:/materija/ra248-2013/E2LP_MP3_Player/E2LP_MP3_Player_XPS_Project/SDK/SDK_Workspace/standalone_bsp_0/microblaze_0/lib"/>
 								</option>
 								<option id="xilinx.gnu.linker.inferred.swplatform.flags.763125385" name="Software Platform Inferred Flags" superClass="xilinx.gnu.linker.inferred.swplatform.flags" valueType="libs">
 									<listOptionValue builtIn="false" value="-Wl,--start-group,-lxil,-lgcc,-lc,--end-group"/>
@@ -200,7 +200,7 @@
 								<option id="xilinx.gnu.mb.linker.inferred.usepcmp.789725039" name="Use Pattern Compare (-mxl-pattern-compare)" superClass="xilinx.gnu.mb.linker.inferred.usepcmp" value="true" valueType="boolean"/>
 								<option id="xilinx.gnu.mb.linker.inferred.mul.1541838182" name="Hardware Multiplier" superClass="xilinx.gnu.mb.linker.inferred.mul" value="xilinx.gnu.mb.linker.inferred.mul.32bit" valueType="enumerated"/>
 								<option id="xilinx.gnu.linker.inferred.swplatform.lpath.1826043020" name="Software Platform Library Path" superClass="xilinx.gnu.linker.inferred.swplatform.lpath" valueType="libPaths">
-									<listOptionValue builtIn="false" value="../../helloworld_bsp/microblaze_0/lib"/>
+									<listOptionValue builtIn="false" value="C:/materija/ra248-2013/E2LP_MP3_Player/E2LP_MP3_Player_XPS_Project/SDK/SDK_Workspace/standalone_bsp_0/microblaze_0/lib"/>
 								</option>
 								<option id="xilinx.gnu.linker.inferred.swplatform.flags.71574084" name="Software Platform Inferred Flags" superClass="xilinx.gnu.linker.inferred.swplatform.flags" valueType="libs">
 									<listOptionValue builtIn="false" value="-Wl,--start-group,-lxil,-lgcc,-lc,--end-group"/>
@@ -210,7 +210,7 @@
 							</tool>
 							<tool id="xilinx.gnu.mb.size.release.204813382" name="MicroBlaze Print Size" superClass="xilinx.gnu.mb.size.release"/>
 							<tool id="xilinx.elfcheck.mb.release.674257336" name="Xilinx ELF Check" superClass="xilinx.elfcheck.mb.release">
-								<option id="xilinx.elfcheck.option.hwspec.386161876" name="Hardware Specification" superClass="xilinx.elfcheck.option.hwspec" value="-hw ../../lab5-master_hw_platform/system.xml" valueType="string"/>
+								<option id="xilinx.elfcheck.option.hwspec.386161876" name="Hardware Specification" superClass="xilinx.elfcheck.option.hwspec" value="-hw C:/materija/ra248-2013/E2LP_MP3_Player/E2LP_MP3_Player_XPS_Project/SDK/SDK_Workspace/lab5-master_hw_platform/system.xml" valueType="string"/>
 								<option id="xilinx.elfcheck.option.procname.261084277" name="Processor Name" superClass="xilinx.elfcheck.option.procname" value="-pe microblaze_0" valueType="string"/>
 							</tool>
 						</toolChain>

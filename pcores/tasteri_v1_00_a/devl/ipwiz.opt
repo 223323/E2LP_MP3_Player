@@ -1,0 +1,9 @@
+-batch 
+-create tasteri 
+-ver 1.00.a 
+-dir "C:\materija\ra248-2013\E2LP_MP3_Player" 
+-lang vhdl 
+-bus axi4lite s 
+-reg 1 
+-xps 
+-driver 

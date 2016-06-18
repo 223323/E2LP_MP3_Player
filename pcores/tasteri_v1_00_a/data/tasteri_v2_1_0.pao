@@ -1,0 +1,10 @@
+##############################################################################
+## Filename:          C:/materija/ra248-2013/E2LP_MP3_Player/pcores/tasteri_v1_00_a/data/tasteri_v2_1_0.pao
+## Description:       Peripheral Analysis Order
+## Date:              Sat Jun 18 12:32:37 2016 (by Create and Import Peripheral Wizard)
+##############################################################################
+
+lib proc_common_v3_00_a  all 
+lib axi_lite_ipif_v1_01_a  all 
+lib tasteri_v1_00_a user_logic vhdl
+lib tasteri_v1_00_a tasteri vhdl

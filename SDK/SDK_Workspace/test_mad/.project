@@ -3,6 +3,7 @@
 	<name>test_mad</name>
 	<comment></comment>
 	<projects>
+		<project>standalone_bsp_0</project>
 		<project>helloworld_bsp</project>
 		<project>E2LP_MP3_Player_bsp</project>
 	</projects>

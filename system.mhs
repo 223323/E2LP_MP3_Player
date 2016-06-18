@@ -33,6 +33,8 @@
  PORT sdcard_spi_MISO_pin = sdcard_spi_MISO, DIR = IO
  PORT sdcard_spi_MOSI_pin = sdcard_spi_MOSI, DIR = IO
  PORT sdcard_spi_SS_pin = sdcard_spi_SS, DIR = IO
+ PORT tasteri_0_joy1_pin = tasteri_0_joy1, DIR = I
+ PORT tasteri_0_joy4_pin = tasteri_0_joy4, DIR = I
 
 
 # PORT vga_periph_0_display_mode_i_pin = vga_periph_0_display_mode_i, DIR = I, VEC = [1:0]
@@ -60,7 +62,7 @@ BEGIN lmb_bram_if_cntlr
  PARAMETER INSTANCE = microblaze_0_i_bram_ctrl_0
  PARAMETER HW_VER = 3.10.c
  PARAMETER C_BASEADDR = 0x00000000
- PARAMETER C_HIGHADDR = 0x0000FFFF
+ PARAMETER C_HIGHADDR = 0x0000ffff
  BUS_INTERFACE SLMB = microblaze_0_ilmb
  BUS_INTERFACE BRAM_PORT = microblaze_0_i_bram_ctrl_2_microblaze_0_bram_block
 END
@@ -76,7 +78,7 @@ BEGIN lmb_bram_if_cntlr
  PARAMETER INSTANCE = microblaze_0_d_bram_ctrl_0
  PARAMETER HW_VER = 3.10.c
  PARAMETER C_BASEADDR = 0x00000000
- PARAMETER C_HIGHADDR = 0x0000FFFF
+ PARAMETER C_HIGHADDR = 0x0000ffff
  BUS_INTERFACE SLMB = microblaze_0_dlmb
  BUS_INTERFACE BRAM_PORT = microblaze_0_d_bram_ctrl_2_microblaze_0_bram_block
 END
@@ -237,7 +239,7 @@ BEGIN lmb_bram_if_cntlr
  PARAMETER INSTANCE = microblaze_0_d_bram_ctrl_2
  PARAMETER HW_VER = 3.10.c
  PARAMETER C_BASEADDR = 0x00020000
- PARAMETER C_HIGHADDR = 0x0002FFFF
+ PARAMETER C_HIGHADDR = 0x0002ffff
  BUS_INTERFACE SLMB = microblaze_0_dlmb
  BUS_INTERFACE BRAM_PORT = microblaze_0_d_bram_ctrl_2_BRAM_PORT
 END
@@ -255,7 +257,7 @@ BEGIN lmb_bram_if_cntlr
  PARAMETER INSTANCE = microblaze_0_i_bram_ctrl_2
  PARAMETER HW_VER = 3.10.c
  PARAMETER C_BASEADDR = 0x00020000
- PARAMETER C_HIGHADDR = 0x0002FFFF
+ PARAMETER C_HIGHADDR = 0x0002ffff
  BUS_INTERFACE SLMB = microblaze_0_ilmb
  BUS_INTERFACE BRAM_PORT = microblaze_0_i_bram_ctrl_2_BRAM_PORT
 END
@@ -268,5 +270,17 @@ BEGIN axi_intc
  BUS_INTERFACE S_AXI = axi4lite_0
  PORT S_AXI_ACLK = clk_100_0000MHz
  PORT Intr = sdcard_spi_IP2INTC_Irpt
+END
+
+BEGIN tasteri
+ PARAMETER INSTANCE = tasteri_0
+ PARAMETER HW_VER = 1.00.a
+ PARAMETER C_BASEADDR = 0x78600000
+ PARAMETER C_HIGHADDR = 0x7860ffff
+ BUS_INTERFACE S_AXI = axi4lite_0
+ PORT S_AXI_ACLK = clk_100_0000MHz
+ PORT interrupt_irq = tasteri_0_interrupt_irq
+ PORT joy1 = tasteri_0_joy1
+ PORT joy4 = tasteri_0_joy4
 END
 

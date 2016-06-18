@@ -1,0 +1,15 @@
+##############################################################################
+## Filename:          C:\materija\ra248-2013\E2LP_MP3_Player/drivers/tasteri_v1_00_a/data/tasteri_v2_1_0.mdd
+## Description:       Microprocessor Driver Definition
+## Date:              Sat Jun 18 12:32:38 2016 (by Create and Import Peripheral Wizard)
+##############################################################################
+
+OPTION psf_version = 2.1.0;
+
+BEGIN DRIVER tasteri
+
+  OPTION supported_peripherals = (tasteri);
+  OPTION depends = (common_v1_00_a);
+  OPTION copyfiles = all;
+
+END DRIVER

@@ -40,7 +40,7 @@
 #include "xparameters.h"
 #include "xil_types.h"
 #include "xintc.h"
-
+#include "tasteri.h"
 #include "pff.h"
 #include "mad.h"
 #include "mp3_parsing.h"
@@ -183,7 +183,7 @@ void vga_init() {
 	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x04, 0x3);// display_mode  1
 	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x08, 0x1);// show frame      2
 	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x0B, 0x1);// font size       3
-	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x10, 0xFF00FF);// foreground 4
+	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x10, 0xff0f00);// foreground 4
 	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x14, 0x0000FF);// background color 5
 	VGA_PERIPH_MEM_mWriteMemory(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR + 0x18, 0x00ff00);// frame color      6
 
@@ -191,17 +191,14 @@ void vga_init() {
 	set_cursor(cursor);
 }
 
-int main(void) {
+#define xil_printf(...)
 
-	init_platform();
-
-	vga_init();
-
-	XStatus status;
-
-
+#define MAX_SONGS 20
+char files[MAX_SONGS][20];
+MP3ID3TAG1 songs[MAX_SONGS];
+int num_songs = 0;
+void read_songs() {
 	// SD card stuff.
-
 	FATFS fatfs; /* File system object */
 	FRESULT rc;
 
@@ -211,27 +208,21 @@ int main(void) {
 		xil_printf("Failed mounting volume with rc = %d!\r\n", (int) rc);
 		return 1;
 	}
-
-	DIR dir;
-	FILINFO fno;
-	pf_opendir(&dir, "");
-
-
 	char buff[128];
 	WORD read;
 	int read_pos;
-
-	set_cursor_line(10);
-
-	xil_printf("Directory listing:\r\n");
 	int size = 0;
+	DIR dir;
+	FILINFO fno;
+	xil_printf("Directory listing:\r\n");
+	pf_opendir(&dir, "");
 	for (;;) {
 
 		rc = pf_readdir(&dir, &fno);	// Read a directory item
 		if(strstr(fno.fname, ".MP3") > 0) {
 			xil_printf("--------------------------\r\n");
 			xil_printf("file: %s\r\n", fno.fname);
-			vga_printf("    file: %s\n", fno.fname);
+			//vga_printf("  %sfile: %s\n", selection==i ? "- " : "  ", fno.fname);
 
 			rc = pf_open(fno.fname);
 			if (rc) {
@@ -257,10 +248,8 @@ int main(void) {
 			if(read == 128) {
 				MP3ID3TAG1 header = *(MP3ID3TAG1*)buff;//parse_mp3_header2(buff);
 
-				vga_printf("     name            %s\n", header.name);
-				vga_printf("     artist          %s\n", header.artist);
-				vga_printf("     album           %s\n", header.album);
-				vga_printf("     comment         %s\n", header.comment);
+				strcpy(files[num_songs], fno.fname);
+				songs[num_songs++] = header;
 			}
 			vga_printf("\n\n");
 
@@ -278,15 +267,61 @@ int main(void) {
 
 
 	}
+}
 
-	xil_printf("Opening a mp3 file...\r\n");
+int main(void) {
 
+	init_platform();
 
-	// MP3 stuff.
+	vga_init();
 
-	xil_printf("Decoding...\r\n");
+	XStatus status;
 
+	int selection = 0;
+	int max_selection = 0;
+	int i;
 
+	read_songs();
+
+	set_cursor_line(10);
+	unsigned int last_key = 0;
+	while(1) {
+		clear_text_screen(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR);
+		set_cursor_line(10);
+
+		vga_printf("\n");
+		for(i=0; i < num_songs; i++) {
+			vga_printf("  %sfile: %s\n", selection==i ? "- " : "  ", files[i]);
+		}
+		vga_printf("\n");
+		vga_printf("\n");
+		vga_printf("     name            %s\n", songs[selection].name);
+		vga_printf("     artist          %s\n", songs[selection].artist);
+		vga_printf("     album           %s\n", songs[selection].album);
+		vga_printf("     comment         %s\n", songs[selection].comment);
+
+		while(1) {
+			unsigned int key = TASTERI_mReadReg(TASTERI_SLV_REG0_OFFSET,0);
+			if(last_key != key) {
+				last_key = key;
+				if((key & 2) == 0) {
+					selection++;
+					if(selection >= num_songs) {
+						selection = 0;
+					}
+
+					break;
+				} else if((key & 1) == 0) {
+					selection--;
+					if(selection < 0) {
+						selection = num_songs-1;
+					}
+					break;
+				}
+			}
+			last_key = key;
+		}
+	}
 
 
 
