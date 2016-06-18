@@ -96,6 +96,6 @@ NET sdcard_spi_SS_pin   LOC = "R19"  |  IOSTANDARD = "LVCMOS33"; # MMC_DATA3, SS
 #NET audio_out_on_audio_codec_power_down_pin LOC = "AF2" | IOSTANDARD = "LVCMOS18";
 
 NET tasteri_0_joy4_pin LOC = "AA23";
-NET tasteri_0_joy1_pin LOC = "AA24";
+NET tasteri_0_joy1_pin LOC = "AB24";
 
 

@@ -102,8 +102,12 @@ void vga_printf(char *fmt, ...)
    strcpy(tmp_str, fmt);
    int i;
    int len = strlen(tmp_str);
-   for(i=0; i < len; i++)
+   for(i=0; i < len; i++) {
 	   tmp_str[i] = toupper2(tmp_str[i]);
+	   if(tmp_str[i] == '\n' || tmp_str[i] == '\t') {
+		   tmp_str[i] = ' ';
+	   }
+   }
 
    //print_string(XPAR_VGA_PERIPH_MEM_0_S_AXI_MEM0_BASEADDR, (unsigned char*)tmp_str, len);
 
@@ -163,6 +167,9 @@ void vga_printf(char *fmt, ...)
 				set_cursor(cursor);
     		}
 
+    	} else if(fmt[b] == '\t') {
+    		cursor+=4*4;
+    		set_cursor(cursor);
     	}
     	b++;
     }
@@ -278,8 +285,7 @@ int main(void) {
 	XStatus status;
 
 	int selection = 0;
-	int max_selection = 0;
-	int i;
+	volatile int i;
 
 	read_songs();
 
@@ -291,14 +297,16 @@ int main(void) {
 
 		vga_printf("\n");
 		for(i=0; i < num_songs; i++) {
-			vga_printf("  %sfile: %s\n", selection==i ? "- " : "  ", files[i]);
+			vga_printf("  \t\t%sfile: %s\n", selection==i ? "* " : "  ", files[i]);
 		}
 		vga_printf("\n");
 		vga_printf("\n");
-		vga_printf("     name            %s\n", songs[selection].name);
-		vga_printf("     artist          %s\n", songs[selection].artist);
-		vga_printf("     album           %s\n", songs[selection].album);
-		vga_printf("     comment         %s\n", songs[selection].comment);
+		vga_printf("     \t\tname            %s\n", songs[selection].name);
+		vga_printf("     \t\tartist          %s\n", songs[selection].artist);
+		vga_printf("     \t\talbum           %s\n", songs[selection].album);
+		vga_printf("     \t\tcomment         %s\n", songs[selection].comment);
+
+		for(i=0; i < 1000000; i++);
 
 		while(1) {
 			unsigned int key = TASTERI_mReadReg(TASTERI_SLV_REG0_OFFSET,0);
@@ -319,7 +327,6 @@ int main(void) {
 					break;
 				}
 			}
-			last_key = key;
 		}
 	}
 
